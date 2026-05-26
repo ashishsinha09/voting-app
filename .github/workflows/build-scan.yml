@@ -1,0 +1,51 @@
+name: Build and Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Login DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - name: Build Vote
+      run: |
+        docker build -t yourrepo/vote:latest ./vote
+
+    - name: Build Result
+      run: |
+        docker build -t yourrepo/result:latest ./result
+
+    - name: Build Worker
+      run: |
+        docker build -t yourrepo/worker:latest ./worker
+
+    - name: Install Sysdig Scanner
+      run: |
+        curl -LO https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/latest/linux/amd64/sysdig-cli-scanner
+        chmod +x sysdig-cli-scanner
+
+    - name: Scan Vote
+      run: |
+        ./sysdig-cli-scanner \
+          docker://yourrepo/vote:latest
+      env:
+        SECURE_API_TOKEN: ${{ secrets.SYSDIG_TOKEN }}
+
+    - name: Scan Result
+      run: |
+        ./sysdig-cli-scanner \
+          docker://yourrepo/result:latest
+      env:
+        SECURE_API_TOKEN: ${{ secrets.SYSDIG_TOKEN }}
