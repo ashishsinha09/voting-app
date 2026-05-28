@@ -1,52 +1,28 @@
-name: Build and Scan
+name: Sysdig Secure - Container Image Scan
+        id: sysdig-scan
+        uses: sysdiglabs/scan-action@v6
+        with:
+          image-tag: ${{ env.SCAN_IMAGE }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          stop-on-failed-policy-eval: true
+          stop-on-processing-error: true
+          severity-at-least: ${{ env.FAIL_ON_SEVERITY }}
+          sysdig-skip-tls: false
+        continue-on-error: true
 
-on:
-  push:
-    branches:
-      - main
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: ${{ github.workspace }}/sarif.json
+          category: sysdig-container-scan
+        continue-on-error: true
 
-jobs:
-  build-scan:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Login DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_PASS }}
-
-    - name: Build Vote
-      run: |
-        docker build -t yourrepo/vote:latest ./vote
-
-    - name: Build Result
-      run: |
-        docker build -t yourrepo/result:latest ./result
-
-    - name: Build Worker
-      run: |
-        docker build -t yourrepo/worker:latest ./worker
-
-    - name: Install Sysdig Scanner
-      run: |
-        curl -LO https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/latest/linux/amd64/sysdig-cli-scanner
-        chmod +x sysdig-cli-scanner
-
-    - name: Scan Vote
-      run: |
-        ./sysdig-cli-scanner \
-          docker://yourrepo/vote:latest
-      env:
-        SECURE_API_TOKEN: 17edc564-7e88-4d00-80d7-2370e52067b0
-        SECURE_API_URL: https://app.eu2.sysdig.com
-
-    - name: Scan Result
-      run: |
-        ./sysdig-cli-scanner \
-          docker://yourrepo/result:latest
-      env:
-        SECURE_API_TOKEN: 17edc564-7e88-4d00-80d7-2370e52067b0
+      - name: Upload scan results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sysdig-scan-results-${{ github.sha }}
+          path: ${{ github.workspace }}/sarif.json
+          retention-days: 30
