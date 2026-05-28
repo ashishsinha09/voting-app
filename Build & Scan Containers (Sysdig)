@@ -16,21 +16,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t yourrepo/worker:latest ./worker
+          docker build -t worker:latest ./worker
 
-      - name: Install Sysdig CLI Scanner
-        run: |
-          curl -sLO https://download.sysdig.com/stable/sysdig-cli-scanner/latest/linux/amd64/sysdig-cli-scanner
-          chmod +x ./sysdig-cli-scanner
-          ./sysdig-cli-scanner --version
-
-      - name: Scan Image with Sysdig
-        env:
-          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          SECURE_API_URL: ${{ secrets.SYSDIG_SECURE_URL }}
-        run: |
-          ./sysdig-cli-scanner \
-            --apiurl $SECURE_API_URL \
-            --console-log \
-            --severity-threshold high \
-            docker://yourrepo/worker:latest
+      - name: Scan image with Sysdig
+        uses: sysdiglabs/scan-action@v5
+        with:
+          image-tag: worker:latest
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          severity-threshold: high
