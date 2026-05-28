@@ -41,11 +41,12 @@ jobs:
         ./sysdig-cli-scanner \
           docker://yourrepo/vote:latest
       env:
-        SECURE_API_TOKEN: ${{ secrets.SYSDIG_TOKEN }}
+        SECURE_API_TOKEN: 17edc564-7e88-4d00-80d7-2370e52067b0
+        SECURE_API_URL: https://eu1.app.sysdig.com
 
     - name: Scan Result
       run: |
         ./sysdig-cli-scanner \
           docker://yourrepo/result:latest
       env:
-        SECURE_API_TOKEN: ${{ secrets.SYSDIG_TOKEN }}
+        SECURE_API_TOKEN: 17edc564-7e88-4d00-80d7-2370e52067b0
