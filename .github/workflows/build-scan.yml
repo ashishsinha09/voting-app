@@ -48,4 +48,4 @@ jobs:
         ./sysdig-cli-scanner \
           docker://yourrepo/result:latest
       env:
-        SECURE_API_TOKEN: ${{ secrets.SYSDIG_TOKEN }}
+        SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
