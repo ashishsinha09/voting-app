@@ -42,7 +42,7 @@ jobs:
           docker://yourrepo/vote:latest
       env:
         SECURE_API_TOKEN: 17edc564-7e88-4d00-80d7-2370e52067b0
-        SECURE_API_URL: https://eu1.app.sysdig.com
+        SECURE_API_URL: https://app.eu2.sysdig.com
 
     - name: Scan Result
       run: |
