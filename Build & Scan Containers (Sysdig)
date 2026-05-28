@@ -1,4 +1,4 @@
-name: Build and Scan Worker
+name: Build and Scan Voting App
 
 on:
   push:
@@ -6,22 +6,72 @@ on:
       - main
       - master
 
+  pull_request:
+
 jobs:
-  build-and-scan:
+  scan-images:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
+      # -----------------------------
+      # Build Vote Service
+      # -----------------------------
+      - name: Build Vote Image
+        run: |
+          docker build -t vote:latest ./vote
+
+      # -----------------------------
+      # Build Result Service
+      # -----------------------------
+      - name: Build Result Image
+        run: |
+          docker build -t result:latest ./result
+
+      # -----------------------------
+      # Build Worker Service
+      # -----------------------------
+      - name: Build Worker Image
         run: |
           docker build -t worker:latest ./worker
 
-      - name: Scan image with Sysdig
-        uses: sysdiglabs/scan-action@v5
+      # -----------------------------
+      # Scan Vote Image
+      # -----------------------------
+      - name: Scan Vote Image
+        uses: sysdiglabs/scan-action@v6
         with:
-          image-tag: worker:latest
+          image-tag: "vote:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
           sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          stop-on-failed-policy-eval: true
+          stop-on-processing-error: true
+          severity-threshold: high
+
+      # -----------------------------
+      # Scan Result Image
+      # -----------------------------
+      - name: Scan Result Image
+        uses: sysdiglabs/scan-action@v6
+        with:
+          image-tag: "result:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          stop-on-failed-policy-eval: true
+          stop-on-processing-error: true
+          severity-threshold: high
+
+      # -----------------------------
+      # Scan Worker Image
+      # -----------------------------
+      - name: Scan Worker Image
+        uses: sysdiglabs/scan-action@v6
+        with:
+          image-tag: "worker:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          stop-on-failed-policy-eval: true
+          stop-on-processing-error: true
           severity-threshold: high
