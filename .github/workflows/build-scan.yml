@@ -38,14 +38,14 @@ jobs:
 
     - name: Scan Vote
       run: |
-        ./sysdig-cli-scanner \
+        ./sysdig-cli-scanner --apiurl https://app.eu2.sysdig.com \
           docker://yourrepo/vote:latest
       env:
         SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
     - name: Scan Result
       run: |
-        ./sysdig-cli-scanner \
+        ./sysdig-cli-scanner --apiurl https://app.eu2.sysdig.com \
           docker://yourrepo/result:latest
       env:
         SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
