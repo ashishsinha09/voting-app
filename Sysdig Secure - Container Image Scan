@@ -1,0 +1,28 @@
+name: Sysdig Secure - Container Image Scan
+        id: sysdig-scan
+        uses: sysdiglabs/scan-action@v6
+        with:
+          image-tag: ${{ env.SCAN_IMAGE }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          stop-on-failed-policy-eval: true
+          stop-on-processing-error: true
+          severity-at-least: ${{ env.FAIL_ON_SEVERITY }}
+          sysdig-skip-tls: false
+        continue-on-error: true
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: ${{ github.workspace }}/sarif.json
+          category: sysdig-container-scan
+        continue-on-error: true
+
+      - name: Upload scan results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sysdig-scan-results-${{ github.sha }}
+          path: ${{ github.workspace }}/sarif.json
+          retention-days: 30
