@@ -33,7 +33,7 @@ jobs:
 
     - name: Install Sysdig Scanner
       run: |
-        curl -LO https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/latest/linux/amd64/sysdig-cli-scanner
+        curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -Ls https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
         chmod +x sysdig-cli-scanner
 
     - name: Scan Vote
@@ -41,7 +41,7 @@ jobs:
         ./sysdig-cli-scanner \
           docker://yourrepo/vote:latest
       env:
-        SECURE_API_TOKEN: ${{ secrets.SYSDIG_TOKEN }}
+        SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
     - name: Scan Result
       run: |
