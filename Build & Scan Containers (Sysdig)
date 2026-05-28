@@ -1,10 +1,10 @@
-⁠name: Sysdig Secure - Container Image Scan
+name: Sysdig Secure - Container Image Scan
         id: sysdig-scan
         uses: sysdiglabs/scan-action@v6
         with:
           image-tag: ${{ env.SCAN_IMAGE }}
-          sysdig-secure-token: 17edc564-7e88-4d00-80d7-2370e52067b0
-          sysdig-secure-url: https://app.eu2.sysdig.com
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
           severity-at-least: ${{ env.FAIL_ON_SEVERITY }}
@@ -20,7 +20,7 @@
         continue-on-error: true
 
       - name: Upload scan results artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: sysdig-scan-results-${{ github.sha }}
